@@ -29,13 +29,14 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 
 /*
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -52,20 +53,37 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name="BasicTankControl", group="TeleOpMode")
-public class BasicTankControl extends OpMode
+public class Organtautsteleop extends OpMode
 {
     DcMotor FrontLeft;
     DcMotor FrontRight;
     DcMotor BackLeft;
     DcMotor BackRight;
+
+    CRServo ServoLeft;
+
+    CRServo ServoRight;
+    double color_threshold = 0.01;
+
+    double ServoPower = 0.5;
+
+
     // Declare OpMode members.
 
 
+    NormalizedColorSensor colorSensor;
+    double rejecttime = 0;
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
+
+        colorSensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
+
+        if (colorSensor instanceof SwitchableLight) {
+            ((SwitchableLight)colorSensor).enableLight(true);
+        }
 
         telemetry.addData("Status", "Initialized");
         FrontLeft = hardwareMap.get(DcMotor.class, "FrontLeft");
@@ -76,6 +94,12 @@ public class BasicTankControl extends OpMode
         FrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         BackLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         BackRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
+        ServoLeft = hardwareMap.get(CRServo.class, "servoLeft");
+        ServoRight = hardwareMap.get(CRServo.class, "servoRight");
+        ServoLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        ServoRight.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     /*
@@ -105,7 +129,12 @@ public class BasicTankControl extends OpMode
         FrontRight.setPower(fr_power);
         BackLeft.setPower(bl_power);
         BackRight.setPower(br_power);
-    }
+
+        if (gamepad1.right_bumper) {
+            run_intake();
+        }
+       }
+
     /*
      * Code to run ONCE after the driver hits STOP
      */
@@ -117,5 +146,35 @@ public class BasicTankControl extends OpMode
             BackRight.setPower(0);
 
     }
+
+    private void run_intake(){
+        NormalizedRGBA colors = colorSensor.getNormalizedColors();
+
+        if (rejecttime!=0) {
+            if ((time-rejecttime)<2){
+                ServoLeft.setPower(-ServoPower);
+                ServoRight.setPower(-ServoPower);
+            } else{
+                rejecttime = 0;
+            }
+        }
+        //no block
+        else if (colors.red<color_threshold && colors.blue<color_threshold && colors.green<color_threshold) {
+            ServoLeft.setPower(ServoPower);
+            ServoRight.setPower(ServoPower);
+        }
+        //Yellow or Red
+        else if ((colors.red<color_threshold && colors.blue>color_threshold && colors.green>color_threshold) ||
+                (colors.red>color_threshold && colors.blue<color_threshold && colors.green<color_threshold)){
+            ServoLeft.setPower(0);
+            ServoRight.setPower(0);
+        }
+        //Blue
+        else {
+            rejecttime = time;
+
+            }
+
+        }
 
 }
