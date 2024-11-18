@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+
 import static java.lang.Thread.sleep;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -14,9 +15,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 //*TELEMETRY- Set power so that it will move but do sleep 2 sec so the servo moves*//
 
-@TeleOp(name="Drive With Gyro", group="Teleop")
+@TeleOp(name="Argo_Auto", group="Teleop")
 //@Disabled
-public class DriveWithGyro extends OpMode
+public class Argo_Auto extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -55,13 +56,15 @@ public class DriveWithGyro extends OpMode
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
+                RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
         imu.initialize(parameters);
         //Field-centric initialization - end
         imu.resetYaw();  //reset the gyro
 
-        frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //INTAKE / deposit
         sliderMotor = hardwareMap.dcMotor.get("sliderMotor");//EHub- Port #1
@@ -76,8 +79,105 @@ public class DriveWithGyro extends OpMode
         //Hold the intake in place
         servoMain.setPosition(.3);
 
-        // Tell the driver that initialization is complete.
-        telemetry.addData("Status", "Initialized");
+// Autonomous
+        // move forward
+        int target = 1000;
+        frontLeftMotor.setTargetPosition(target);
+        frontRightMotor.setTargetPosition(target);
+        backLeftMotor.setTargetPosition(target);
+        backRightMotor.setTargetPosition(target);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftMotor.setPower(motorPower);
+        frontRightMotor.setPower(motorPower);
+        backLeftMotor.setPower(motorPower);
+        backRightMotor.setPower(motorPower);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        //move hand forward
+
+        servoMain.setPosition(0.4);
+
+        //lift slider up
+        if (sliderMotor.getCurrentPosition()<= positionUp) {
+            sliderMotor.setTargetPosition(positionUp);
+            sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            sliderMotor.setPower(motorPower);
+
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            sliderMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            sliderMotor.setPower(0.0);
+            sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+
+       //drop specimen;
+        servoGrab.setPower(-.5);
+        try {
+            sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        servoGrab.setPower(0);
+
+        //bring hand back
+        servoMain.setPosition(.3);
+
+        //move slider down
+       // if (sliderMotor.getCurrentPosition()>= positionDown)
+        {
+            sliderMotor.setTargetPosition(positionDown);
+            sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            sliderMotor.setPower(motorPower);
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+
+            sliderMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            sliderMotor.setPower(0.0);
+            sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+
+        //park robot
+        target = -1000;
+        frontLeftMotor.setTargetPosition(target);
+        frontRightMotor.setTargetPosition(target);
+        backLeftMotor.setTargetPosition(target);
+        backRightMotor.setTargetPosition(target);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftMotor.setPower(motorPower);
+        frontRightMotor.setPower(motorPower);
+        backLeftMotor.setPower(motorPower);
+        backRightMotor.setPower(motorPower);
+
+
+
+
+
+
+
+
+
+
+
 
     }
 
@@ -157,7 +257,7 @@ public class DriveWithGyro extends OpMode
         {
             servoGrab.setPower(.5);
             try {
-                Thread.sleep(1000);
+                sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -167,7 +267,7 @@ public class DriveWithGyro extends OpMode
         {
             servoGrab.setPower(-.5);
             try {
-                Thread.sleep(1000);
+                sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -185,7 +285,7 @@ public class DriveWithGyro extends OpMode
                 sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 sliderMotor.setPower(motorPower);
                 try {
-                    Thread.sleep(1000);
+                    sleep(1000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -203,7 +303,7 @@ public class DriveWithGyro extends OpMode
 
                 sliderMotor.setPower(motorPower);
                 try {
-                    Thread.sleep(1000);
+                    sleep(1000);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
