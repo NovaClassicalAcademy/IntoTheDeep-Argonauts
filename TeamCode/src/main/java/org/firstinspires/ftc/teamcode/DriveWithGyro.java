@@ -109,7 +109,7 @@ public class DriveWithGyro extends OpMode
 
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double speedMax = 0.7;
+        double speedMax = 0.6;
 
         telemetry.addData("left Stick X: ", leftStickX);
         telemetry.addData("left Stick Y: ", leftStickY);
@@ -130,7 +130,7 @@ public class DriveWithGyro extends OpMode
         // but only if at least one is out of the range [-1, 1]
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
 
-        double frontLeftPower = ((rotY + rotX + leftStickY) / denominator) * speedMax;
+        double frontLeftPower = ((rotY + rotX + rightStickX) / denominator) * speedMax;
         double backLeftPower = ((rotY - rotX + rightStickX) / denominator) * speedMax;
         double frontRightPower = ((rotY - rotX - rightStickX) / denominator) * speedMax;
         double backRightPower = ((rotY + rotX - rightStickX) / denominator) * speedMax;
