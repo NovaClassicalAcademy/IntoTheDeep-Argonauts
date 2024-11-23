@@ -44,6 +44,7 @@ public class DriveWithGyro extends OpMode
      */
     @Override
     public void init() {
+
         // Drivetrain
         frontLeftMotor = hardwareMap.dcMotor.get("FrontLeft");//Hub - Port #2
         backLeftMotor = hardwareMap.dcMotor.get("BackLeft");//Hub - Port # 1
@@ -108,6 +109,8 @@ public class DriveWithGyro extends OpMode
 
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
+        double speedMax = 0.7;
+
         telemetry.addData("left Stick X: ", leftStickX);
         telemetry.addData("left Stick Y: ", leftStickY);
         telemetry.addData("Heading: ", botHeading);
@@ -127,10 +130,10 @@ public class DriveWithGyro extends OpMode
         // but only if at least one is out of the range [-1, 1]
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
 
-        double frontLeftPower = (rotY + rotX + leftStickY) / denominator;
-        double backLeftPower = (rotY - rotX + rightStickX) / denominator;
-        double frontRightPower = (rotY - rotX - rightStickX) / denominator;
-        double backRightPower = (rotY + rotX - rightStickX) / denominator;
+        double frontLeftPower = ((rotY + rotX + leftStickY) / denominator) * speedMax;
+        double backLeftPower = ((rotY - rotX + rightStickX) / denominator) * speedMax;
+        double frontRightPower = ((rotY - rotX - rightStickX) / denominator) * speedMax;
+        double backRightPower = ((rotY + rotX - rightStickX) / denominator) * speedMax;
 
         frontLeftMotor.setPower(-frontLeftPower);
         backLeftMotor.setPower(-backLeftPower);

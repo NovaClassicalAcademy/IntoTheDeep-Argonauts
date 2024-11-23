@@ -10,15 +10,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.Servo.Direction;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 //*TELEMETRY- Set power so that it will move but do sleep 2 sec so the servo moves*//
 
-@TeleOp(name="Argo_Auto", group="Teleop")
+@TeleOp(name="Argo_Auto_Turn", group="Teleop")
 //@Disabled
-public class Argo_Auto extends OpMode
+public class Argo_Auto_Turn extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -47,6 +46,7 @@ public class Argo_Auto extends OpMode
      */
     @Override
     public void init() {
+
         // Drivetrain
         frontLeftMotor = hardwareMap.dcMotor.get("FrontLeft");//Hub - Port #2
         backLeftMotor = hardwareMap.dcMotor.get("BackLeft");//Hub - Port # 1
@@ -105,127 +105,13 @@ public class Argo_Auto extends OpMode
      */
     @Override
     public void loop() {
-        //drvetrain
-        double leftStickY = -gamepad1.left_stick_y;
-        double leftStickX = gamepad1.left_stick_x;
-        double rightStickX = gamepad1.right_stick_x;
 
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-        telemetry.addData("left Stick X: ", leftStickX);
-        telemetry.addData("left Stick Y: ", leftStickY);
-        telemetry.addData("Heading: ", botHeading);
-
-        //*************************
-        //* Field-centric driving *
-        //*************************
-
-        // Rotate the movement direction counter to the bot's rotation
-        double rotX = leftStickX * Math.cos(-botHeading) - leftStickY * Math.sin(-botHeading);
-        double rotY = leftStickX * Math.sin(-botHeading) + leftStickY * Math.cos(-botHeading);
-        double maxSpeed = .7;
-        rotX = rotX * 1.1;  // Counteract imperfect strafing
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rightStickX), 1);
-
-        double frontLeftPower = ((rotY + rotX + leftStickY) / denominator) * maxSpeed;
-        double backLeftPower = ((rotY - rotX + rightStickX) / denominator) * maxSpeed;
-        double frontRightPower = ((rotY - rotX - rightStickX) / denominator) * maxSpeed;
-        double backRightPower = ((rotY + rotX - rightStickX) / denominator) * maxSpeed;
-
-        frontLeftMotor.setPower(-frontLeftPower);
-        backLeftMotor.setPower(-backLeftPower);
-        frontRightMotor.setPower(frontRightPower);
-        backRightMotor.setPower(backRightPower);
-
-
-        //intake
-        double Servoposition =0.65;
-
-        if ( gamepad2.a)// Brings the intake down
-        {
-            servoMain.setPosition(Servoposition);
-            telemetry.addData("Servo x position", servoMain.getPosition());
-        }
-
-        if ( gamepad2.y) //Brings intake up
-        {
-            servoMain.setPosition(0.2);
-            telemetry.addData("Servo b position", servoMain.getPosition());
-        }
-
-        if (gamepad2.b) //Intake butter blocks
-        {
-            servoGrab.setPower(.5);
-            try {
-                sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            servoGrab.setPower(0);
-        }
-        if (gamepad2.x) //Outake
-        {
-            servoGrab.setPower(-.5);
-            try {
-                sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            servoGrab.setPower(0);
-        }
-        //slider
-        boolean dpadUp = gamepad2.dpad_up;
-        boolean dpadDown = gamepad2.dpad_down;
-
-        if (dpadUp) {
-            // Move slider up
-            //moveSliderToPosition(positionUp);
-            if (sliderMotor.getCurrentPosition()<= positionUp) {
-                sliderMotor.setTargetPosition(positionUp);
-                sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                sliderMotor.setPower(motorPower);
-                try {
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                sliderMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                sliderMotor.setPower(0.0);
-                sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            }
-        } else if (dpadDown) {
-            // Move slider down
-            //moveSliderToPosition(positionDown);
-            if (sliderMotor.getCurrentPosition()>= positionDown)
-            {
-                sliderMotor.setTargetPosition(positionDown);
-                sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-                sliderMotor.setPower(motorPower);
-                try {
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                sliderMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                sliderMotor.setPower(0.0);
-                sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            }
-        }
-
-
-        // Show the elapsed game time and wheel power.
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
 
 
         // Autonomous
         // move forward
 
-        int target = 2000;
+        int target = 200;
         frontLeftMotor.setTargetPosition(target);
         frontRightMotor.setTargetPosition(target);
         backLeftMotor.setTargetPosition(target);
@@ -238,11 +124,35 @@ public class Argo_Auto extends OpMode
         frontRightMotor.setPower(motorPowerAuto);
         backLeftMotor.setPower(motorPowerAuto);
         backRightMotor.setPower(motorPowerAuto);
-       /* try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }*/
+//turn left
+        target = 100;
+        //frontLeftMotor.setTargetPosition(target);
+        frontRightMotor.setTargetPosition(target);
+        //backLeftMotor.setTargetPosition(target);
+        backRightMotor.setTargetPosition(target);
+        //frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //frontLeftMotor.setPower(motorPowerAuto);
+        frontRightMotor.setPower(motorPowerAuto);
+        //backLeftMotor.setPower(motorPowerAuto);
+        backRightMotor.setPower(motorPowerAuto);
+//move forward
+        target = 1500;
+        frontLeftMotor.setTargetPosition(target);
+        frontRightMotor.setTargetPosition(target);
+        backLeftMotor.setTargetPosition(target);
+        backRightMotor.setTargetPosition(target);
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeftMotor.setPower(motorPowerAuto);
+        frontRightMotor.setPower(motorPowerAuto);
+        backLeftMotor.setPower(motorPowerAuto);
+        backRightMotor.setPower(motorPowerAuto);
+
         //move hand forward
 
         servoMain.setPosition(0.4);
