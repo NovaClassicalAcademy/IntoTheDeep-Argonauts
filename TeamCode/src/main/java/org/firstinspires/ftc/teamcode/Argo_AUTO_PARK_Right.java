@@ -77,6 +77,8 @@ public class Argo_AUTO_PARK_Right extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+
+
         // Drivetrain
         frontLeftMotor = hardwareMap.dcMotor.get("FrontLeft");//Hub - Port #2
         backLeftMotor = hardwareMap.dcMotor.get("BackLeft");//Hub - Port # 1
@@ -94,8 +96,8 @@ public class Argo_AUTO_PARK_Right extends LinearOpMode {
         imu.resetYaw();  //reset the gyro
 
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
         //INTAKE / deposit
@@ -111,6 +113,12 @@ public class Argo_AUTO_PARK_Right extends LinearOpMode {
         //Hold the intake in place
         servoMain.setPosition(.3);
         // Wait for the game to start (driver presses START)
+
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         waitForStart();
        // runtime.reset();
 
@@ -119,8 +127,8 @@ public class Argo_AUTO_PARK_Right extends LinearOpMode {
 
             // Autonomous
             // Strafe right
-
-            int target = 1200;
+        telemetry.addData("Servo x position", servoMain.getPosition());
+            int target = 2500;
             frontLeftMotor.setTargetPosition(target);
             frontRightMotor.setTargetPosition(target);
             backLeftMotor.setTargetPosition(target);
@@ -130,10 +138,22 @@ public class Argo_AUTO_PARK_Right extends LinearOpMode {
             backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             frontLeftMotor.setPower(motorPowerAuto);
-            frontRightMotor.setPower(-motorPowerAuto);
-            backLeftMotor.setPower(-motorPowerAuto);
+            frontRightMotor.setPower(motorPowerAuto);
+            backLeftMotor.setPower(motorPowerAuto);
             backRightMotor.setPower(motorPowerAuto);
 
-       // }
+        try {
+            Thread.sleep(8000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        frontLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backLeftMotor.setPower(0);
+        backRightMotor.setPower(0);
+
+
+
+        // }
     }
 }
