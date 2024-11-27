@@ -94,26 +94,12 @@ public class Argo_AUTO_Forward extends LinearOpMode {
 
         if (opModeIsActive()) {
             // Move robot forward by a specified number of inches (e.g., 24 inches)
-            moveForward(24); // Move forward 24 inches (change this value as needed)
+            moveForward(48); // Move forward 24 inches (change this value as needed)
         }
 
     }
     // Function to move the robot forward by a specific distance in inches
     public void moveForward(double inches) {
-
-
-        telemetry.addData("BL", backLeftMotor.getDirection());
-        telemetry.addData("BR", backRightMotor.getDirection());
-        telemetry.addData("FL", frontLeftMotor.getDirection());
-        telemetry.addData("FR", frontRightMotor.getDirection());
-        telemetry.update();
-
-        try {
-            Thread.sleep(9000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
 
         // Calculate the number of encoder ticks needed to move the robot the desired distance
         int targetTicks = (int) (inches / INCHES_PER_TICK);
@@ -140,6 +126,12 @@ public class Argo_AUTO_Forward extends LinearOpMode {
             // Add any additional telemetry or logic if needed
             telemetry.addData("Moving", "Inches: " + inches);
             telemetry.addData("Target Position", targetTicks);
+
+            telemetry.addData("BL", backLeftMotor.getDirection());
+            telemetry.addData("BR", backRightMotor.getDirection());
+            telemetry.addData("FL", frontLeftMotor.getDirection());
+            telemetry.addData("FR", frontRightMotor.getDirection());
+
             telemetry.update();
         }
 
