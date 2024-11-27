@@ -82,8 +82,10 @@ public class Argo_AUTO_Forward extends LinearOpMode {
         backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        //frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        //backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
 
@@ -98,6 +100,20 @@ public class Argo_AUTO_Forward extends LinearOpMode {
     }
     // Function to move the robot forward by a specific distance in inches
     public void moveForward(double inches) {
+
+
+        telemetry.addData("BL", backLeftMotor.getDirection());
+        telemetry.addData("BR", backRightMotor.getDirection());
+        telemetry.addData("FL", frontLeftMotor.getDirection());
+        telemetry.addData("FR", frontRightMotor.getDirection());
+        telemetry.update();
+
+        try {
+            Thread.sleep(9000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
 
         // Calculate the number of encoder ticks needed to move the robot the desired distance
         int targetTicks = (int) (inches / INCHES_PER_TICK);
