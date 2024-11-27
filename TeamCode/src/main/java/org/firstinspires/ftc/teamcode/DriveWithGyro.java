@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 //*TELEMETRY- Set power so that it will move but do sleep 2 sec so the servo moves*//
 
-@TeleOp(name="Drive With Gyro", group="Teleop")
+@TeleOp(name="Drive With Gyro-Field centric", group="Teleop")
 //@Disabled
 public class DriveWithGyro extends OpMode
 {
@@ -55,8 +55,8 @@ public class DriveWithGyro extends OpMode
         imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         imu.initialize(parameters);
         //Field-centric initialization - end
         imu.resetYaw();  //reset the gyro
@@ -109,7 +109,7 @@ public class DriveWithGyro extends OpMode
 
         double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double speedMax = 0.6;
+        double speedMax = 1;
 
         telemetry.addData("left Stick X: ", leftStickX);
         telemetry.addData("left Stick Y: ", leftStickY);

@@ -56,23 +56,16 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp(name="Argo_AUTO_Forward", group="Linear OpMode")
 //@Disabled
 public class Argo_AUTO_Forward extends LinearOpMode {
-    // Declare OpMode members.
-    private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor frontLeftMotor = null;
-    private DcMotor backLeftMotor = null;
-    private DcMotor frontRightMotor = null;
-    private DcMotor backRightMotor = null;
-    private DcMotor sliderMotor = null;
-    public double triggerSensitivityDeposit;
-    public double triggerSensitivityIntake;
-    private Servo servoMain;
-    private CRServo servoGrab= null;
-    private double motorPower = 0.3;
-    private double motorPowerAuto = 0.3;
-    // Target positions for the slider (in encoder ticks)
-    private int positionUp = 1500;   // Example target position for slider up
-    private int positionDown = 0;     // Example target position for slider down
-    private IMU imu;
+
+    private DcMotor frontLeftMotor,backLeftMotor,frontRightMotor,backRightMotor;
+
+    // Constants
+    private static final double WHEEL_DIAMETER = 3.78; // inches
+    private static final double COUNTS_PER_REV = 753.2; // Encoder counts per full revolution of the motor
+    private static final double DRIVE_GEAR_RATIO = 1.0; // Gear ratio (1:1 for direct drive, adjust if needed)
+
+    // Calculate the distance per encoder tick
+    private static final double INCHES_PER_TICK = (Math.PI * WHEEL_DIAMETER) / COUNTS_PER_REV;
 
     @Override
     public void runOpMode() {
@@ -82,79 +75,57 @@ public class Argo_AUTO_Forward extends LinearOpMode {
         backLeftMotor = hardwareMap.dcMotor.get("BackLeft");//Hub - Port # 1
         frontRightMotor = hardwareMap.dcMotor.get("FrontRight");//Hub - Port #0
         backRightMotor = hardwareMap.dcMotor.get("BackRight");//Hub - Port #3
-        // Define the IMU (gyro sensor)
-        // Retrieve the IMU from the hardware map
-        imu = hardwareMap.get(IMU.class, "imu");
-        // Adjust the orientation parameters to match your robot
-        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
-                RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
-        imu.initialize(parameters);
-        //Field-centric initialization - end
-        imu.resetYaw();  //reset the gyro
 
-        frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        // Set motor modes to run without encoders (using encoders for position control)
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        //INTAKE / deposit
-        sliderMotor = hardwareMap.dcMotor.get("sliderMotor");//EHub- Port #1
-        servoMain = hardwareMap.servo.get("servoMain");//Hub - Port #0
-        servoGrab = hardwareMap.crservo.get("servoGrab");//Hub - Port #2
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        sliderMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        // Reset encoders and set to RUN_USING_ENCODER mode
-        sliderMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        //Hold the intake in place
-        servoMain.setPosition(.3);
-        // Wait for the game to start (driver presses START)
+        // Wait for the start button to be pressed
         waitForStart();
-       // runtime.reset();
 
-        // run until the end of the match (driver presses STOP)
-        //while (opModeIsActive()) {
+        if (opModeIsActive()) {
+            // Move robot forward by a specified number of inches (e.g., 24 inches)
+            moveForward(24); // Move forward 24 inches (change this value as needed)
+        }
 
-            // Autonomous
-            // move forward
+    }
+    // Function to move the robot forward by a specific distance in inches
+    public void moveForward(double inches) {
 
-            int target = 1200;
-            frontLeftMotor.setTargetPosition(target);
-            frontRightMotor.setTargetPosition(target);
-            backLeftMotor.setTargetPosition(target);
-            backRightMotor.setTargetPosition(target);
-            frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            frontLeftMotor.setPower(motorPowerAuto);
-            frontRightMotor.setPower(motorPowerAuto);
-            backLeftMotor.setPower(motorPowerAuto);
-            backRightMotor.setPower(motorPowerAuto);
+        // Calculate the number of encoder ticks needed to move the robot the desired distance
+        int targetTicks = (int) (inches / INCHES_PER_TICK);
 
-            //lift slider up
-            if (sliderMotor.getCurrentPosition()<= positionUp) {
-                sliderMotor.setTargetPosition(positionUp);
-                sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                sliderMotor.setPower(motorPower);
+        // Set the target position for each motor
+        frontLeftMotor.setTargetPosition(targetTicks);
+        frontRightMotor.setTargetPosition(targetTicks);
+        backLeftMotor.setTargetPosition(targetTicks);
+        backRightMotor.setTargetPosition(targetTicks);
 
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+        // Set the motors to run forward (positive power)
+        frontLeftMotor.setPower(0.5);  // Adjust power as necessary
+        frontRightMotor.setPower(0.5);
+        backLeftMotor.setPower(0.5);
+        backRightMotor.setPower(0.5);
 
-                sliderMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                sliderMotor.setPower(0.0);
-                sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            }
+        // Wait until all motors reach the target position
+        while (opModeIsActive() && (frontLeftMotor.isBusy() || frontRightMotor.isBusy() || backLeftMotor.isBusy() || backRightMotor.isBusy())) {
+            // Add any additional telemetry or logic if needed
+            telemetry.addData("Moving", "Inches: " + inches);
+            telemetry.addData("Target Position", targetTicks);
+            telemetry.update();
+        }
 
-        //move hand forward
-
-        servoMain.setPosition(0.4);
-
-       // }
+        // Stop motors once the target is reached
+        frontLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backLeftMotor.setPower(0);
+        backRightMotor.setPower(0);
     }
 }
