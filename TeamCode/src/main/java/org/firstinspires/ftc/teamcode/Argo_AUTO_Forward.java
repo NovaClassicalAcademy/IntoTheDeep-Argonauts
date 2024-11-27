@@ -82,10 +82,7 @@ public class Argo_AUTO_Forward extends LinearOpMode {
         backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
 
         // Wait for the start button to be pressed
         waitForStart();
@@ -107,6 +104,11 @@ public class Argo_AUTO_Forward extends LinearOpMode {
         frontRightMotor.setTargetPosition(targetTicks);
         backLeftMotor.setTargetPosition(targetTicks);
         backRightMotor.setTargetPosition(targetTicks);
+
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Set the motors to run forward (positive power)
         frontLeftMotor.setPower(0.5);  // Adjust power as necessary
